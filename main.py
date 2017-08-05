@@ -12,6 +12,9 @@ API_SECRET = "a6ec7b2d50de468ae805626f67b4a793"
 username = "Priyank14"
 password_hash = pylast.md5("#1Passwordlast.fm")
 
+### SPOTIFY
+oauthToken = "BQDm11wKhdp4Ozltzx8YrCyaG_ifVPgZrTi7UHunwhDGVJxk9eyf4utDCoV5OciVKex6v_k62Rx_a3fiIWof1AYZRBvWJsvoa9ZdrTu57zEEUtJ8OGF0cXGV0HL3EusXTqzWLbru"
+
 
 def getFiles(params):
     inputList = os.listdir(params)
@@ -66,18 +69,18 @@ def main():
     print("Folder: {0}".format(folder))
     for file in getFiles(folder)[1:2]:
         try:
-            function = loadFile(file)
+            #function = loadFile(file)
             #jsonData = getData(function.tag.title, function.tag.artist)
-            spotify = spotipy.Spotify(auth="BQAI6OcBg2NaI36mG63newc7G_AKgVwq7n4lB4esY-OjywGEAlKwXlO1Sv6fxDqj_xEzbS6kTGITuvHeHZrxKF-TT7xqp_zhXQFvJ-f4VbUbaB4zFSvXmsmdV4Aj99PVwrfe7Ztv")
-            results = spotify.search("Birds - coldplay")
+            spotify = spotipy.Spotify(auth=oauthToken)
+            results = spotify.search("birds - coldplay")
             ### TITLE
-            print(results['tracks']['items'][0]['name'])
+            print(results['tracks']['items'][2]['name'])
             ### ALBUM
-            print(results['tracks']['items'][0]['album']['name'])
+            print(results['tracks']['items'][2]['album']['name'])
             ### ARTIST
-            print(results['tracks']['items'][0]['album']['artists'][0]['name'])
+            print(results['tracks']['items'][2]['album']['artists'][0]['name'])
             ### ALBUM ART URL
-            print(results['tracks']['items'][0]['album']['images'][0]['url'])
+            print(results['tracks']['items'][2]['album']['images'][0]['url'])
 
             '''
             if not jsonData:
