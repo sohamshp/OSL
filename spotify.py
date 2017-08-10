@@ -7,6 +7,10 @@ import requests
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import shutil
+import urllib
+from mutagen.easyid3 import EasyID3
+from mutagen.mp3 import MP3
+from mutagen.id3 import ID3, APIC
 
 ### SPOTIFY CLIENT CREDENTIALS
 client_id = "c2f4a8f1e315477fb08500b798460812"
@@ -40,7 +44,8 @@ def getFiles(params):
 
 
 def loadFile(location):
-    audioFile = eyed3.load(location)
+    #audioFile = eyed3.load(location)
+    audioFile = MP3(location, ID3=ID3)
     print("Opened file {0} in eyeD3.".format(location))
     return audioFile
 
@@ -73,31 +78,48 @@ def getAllArtists(artists):
 
 
 def getAlbumArt(imageUrl):
-    response = requests.get(imageUrl, stream=True)
-    return response.raw
+    response = urllib.urlopen(imageUrl)  
+    return response.read()
 
 
 def modify(audioFile, trackData, artist=True, album=True, albumArt=False):
     artist = getAllArtists(trackData['album']['artists'])
     album = trackData["album"]["name"]
     title = trackData["name"]
+    
+    try:
+        audioFile.add_tags()
+    except:
+        pass
+    
+    albumArt = getAlbumArt(trackData['album']['images'][0]['url'])
+    
+    audioFile.tags.add(
+        APIC(
+            encoding=3,
+            mime="image/jpeg",
+            type=3,
+            desc=u"cover",
+            data=albumArt.read()
+        )
+    )
+    
+    audioFile.save()
+    
+    print(audioFile)
+    '''
     audioFile.tag.artist = artist
     audioFile.tag.album = album
     audioFile.tag.title = title
-    audioFile.tag.setTitle(title)
-    #audioFile.tag.save(version=(2,4,0))
+    audioFile.tag.save(version=(2,3,0))
     print(title, artist, album)
-    art = getAlbumArt(trackData['album']['images'][0]['url'])
-    audioFile.tag.images.set(3, art, "image/jpeg")
-    audioFile.tag.save(version=(2,4,0))
-    '''
-    picture = getAlbumArt()
-    if picture:
-        print("Album Art found.")
-        imageData = ### load image here ### urllib2.urlopen(picture).read()
-        function.tag.images.set(3, imageData, "image/jpeg", u"you can put a description here")
-    else:
-        print("Album Art not found")
+    print(trackData['album']['images'][0])
+    art = getAlbumArt(trackData['album']['images'][-1]['url'])
+    audioFile.tag.images.set(0, art, "image/jpeg", u"desc.")
+    audioFile.tag.images.set(3, art, "image/jpeg", u"desc.")
+    audioFile.tag.images.set(4, art, "image/jpeg", u"desc.")
+    audioFile.tag.setTitle = title
+    audioFile.tag.save(version=(2,3,0))
     '''
     return True, artist
 
