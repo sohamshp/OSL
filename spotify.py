@@ -6,6 +6,7 @@ import json
 import requests
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+import shutil
 
 ### SPOTIFY CLIENT CREDENTIALS
 client_id = "c2f4a8f1e315477fb08500b798460812"
@@ -32,7 +33,9 @@ def getFiles(params):
     inputList = os.listdir(params)
     outputList = []
     for data in inputList:
-        outputList.append(params+"\\"+data)
+        if ".mp3" in data:
+            print(data)
+            outputList.append(params+"/"+data)
     return outputList
 
 
@@ -69,6 +72,11 @@ def getAllArtists(artists):
     return ", ".join(artists_names)
 
 
+def getAlbumArt(imageUrl):
+    response = requests.get(imageUrl, stream=True)
+    return response.raw
+
+
 def modify(audioFile, trackData, artist=True, album=True, albumArt=False):
     artist = getAllArtists(trackData['album']['artists'])
     album = trackData["album"]["name"]
@@ -76,7 +84,12 @@ def modify(audioFile, trackData, artist=True, album=True, albumArt=False):
     audioFile.tag.artist = artist
     audioFile.tag.album = album
     audioFile.tag.title = title
-    print(artist, album, title)
+    audioFile.tag.setTitle(title)
+    #audioFile.tag.save(version=(2,4,0))
+    print(title, artist, album)
+    art = getAlbumArt(trackData['album']['images'][0]['url'])
+    audioFile.tag.images.set(3, art, "image/jpeg")
+    audioFile.tag.save(version=(2,4,0))
     '''
     picture = getAlbumArt()
     if picture:
@@ -91,12 +104,12 @@ def modify(audioFile, trackData, artist=True, album=True, albumArt=False):
 
 def main():
     print("Folder: {0}".format(folder))
-    for file in getFiles(folder)[3:4]:
+    for file in getFiles(folder):
         try:
             audioFile = loadFile(file)
             param_str = customTrim(file)
-            trackData = getData(param_str.replace(folder+"\\", ""))
-            print(trackData)
+            trackData = getData(param_str.replace(folder+"/", ""))
+            #print(trackData)
             modify(audioFile, trackData)
         except:
             pass
@@ -104,7 +117,8 @@ def main():
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        folder = "C:\\Users\\shp\\Desktop\\osl_test" ### some folder name [default]
+        #folder = "C:\\Users\\shp\\Desktop\\osl_test" ### some folder name [default]
+        folder = "/home/ubuntu/workspace/OSL"
     else:
         folder = sys.argv[1]
     main()
