@@ -84,7 +84,7 @@ def getGenreYear(title, artist):
     results = requests.get(url).json()
     year = results['message']['body']['track_list'][0]['track']['first_release_date']
     year = year[:4]
-    if len(results['message']['body']['track_list'][0]['track']['primary_genres']['music_genre_list'])>1 :
+    if len(results['message']['body']['track_list'][0]['track']['primary_genres']['music_genre_list'])>=1 :
         genre = results['message']['body']['track_list'][0]['track']['primary_genres']['music_genre_list'][0]['music_genre'][
             'music_genre_name']
     else:
